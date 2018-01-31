@@ -18,9 +18,7 @@ include_directories(${CUDA_INCLUDE_DIRS})
 # Compile CU files
 list( APPEND CUDA_NVCC_FLAGS "-gencode arch=compute_30,code=sm_30; -std=c++11")
 cuda_compile(CudaKernel src/CUDA.cu)
-#cuda_add_library(CudaKernel ${GD_LIBRARIES})
 
 # COMPILE AND LINK
-#cuda_add_executable(Mandelbrot_set $(SOURCE_FILES))
 add_executable(Mandelbrot_set ${SOURCE_FILES} ${CudaKernel})
 target_link_libraries(Mandelbrot_set ${GD_LIBRARIES} ${CUDA_LIBRARIES})
