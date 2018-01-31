@@ -1,16 +1,18 @@
 #include <cuda.h>
-#include "./include/CUDA_wrappers.hpp"
+#include "../include/CUDA_wrappers.hpp"
+#include <host_defines.h>
+#include <device_launch_parameters.h>
 
 // функция вычисления точки
-__global__ void compute_point(double x_down, double x_up, double y_down, double y_up, unsigned int iteration_count, unsigned int width, unsigned int height, unsigned int* matrix) {
-    double re = x_down + (x_up - x_down) * (blockIdx.x % width + 0.5) / (double) width;
-    double im = y_up - (y_up - y_down) * (blockIdx.x / width + 0.5) / (double) height;
+__global__ void compute_point(double* x_down, double* x_up, double* y_down, double* y_up, unsigned int* iteration_count, unsigned int* width, unsigned int* height, unsigned int* matrix) {
+    double re = *x_down + (*x_up - *x_down) * ((blockIdx.x % *width) + 0.5) / (double) *width;
+    double im = *y_up - (*y_up - *y_down) * ((blockIdx.x / *width) + 0.5) / (double) *height;
     double re_curr = 0;
     double im_curr = 0;
     // проверка на принадлежность главной картиоиде
 
     // проверка точки
-    for(unsigned int iteration = 1; iteration <= iteration_count; ++iteration) {
+    for(unsigned int iteration = 1; iteration <= *iteration_count; ++iteration) {
         re_curr = re_curr * re_curr - im_curr * im_curr + re;
         im_curr = 2 * re_curr * im_curr + im;
         if(re_curr * re_curr + im_curr * im_curr >= 4.0) {
@@ -51,7 +53,7 @@ void compute_matrix(unsigned int* matrix, double x_down, double x_up, double y_d
     cudaMemcpy(dev_height, &height, sizeof(unsigned int), cudaMemcpyHostToDevice);
     cudaMemcpy(dev_matrix, &matrix, width * height * sizeof(unsigned int), cudaMemcpyHostToDevice);
     // запускаем ядро
-    compute_matrix<<< (width * height), 1 >>>(dev_x_down, dev_x_up, dev_y_down, dev_y_up, dev_iteration_count, dev_width, dev_height, dev_matrix);
+    compute_point<<< (width * height), 1 >>>(dev_x_down, dev_x_up, dev_y_down, dev_y_up, dev_iteration_count, dev_width, dev_height, dev_matrix);
     // event
     cudaEvent_t syncEvent;
     cudaEventCreate(&syncEvent);    //Создаем event
