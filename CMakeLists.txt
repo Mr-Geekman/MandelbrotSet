@@ -2,10 +2,8 @@ cmake_minimum_required(VERSION 3.8)
 project(Mandelbrot_set)
 
 set(CMAKE_CXX_STANDARD 11)
-set(SOURCE_FILES main.cpp)
-set(CUDA_PROPAGATE_HOST_FLAGS OFF)
 
-include_directories(include)
+set(SOURCE_FILES main.cpp include/CUDA_wrappers.hpp src/CUDA.cu)
 
 # LIBGD Package
 find_package(GD REQUIRED)
@@ -16,9 +14,9 @@ find_package(CUDA REQUIRED)
 include_directories(${CUDA_INCLUDE_DIRS})
 
 # Compile CU files
-list( APPEND CUDA_NVCC_FLAGS "-gencode arch=compute_30,code=sm_30; -std=c++11")
-cuda_compile(CudaKernel src/CUDA.cu)
+list( APPEND CUDA_NVCC_FLAGS "-gencode arch=compute_30,code=sm_30; -std=c++11") #узнать, что значат compute и code
+cuda_add_library(CudaKernels src/CUDA.cu)
 
 # COMPILE AND LINK
-add_executable(Mandelbrot_set ${SOURCE_FILES} ${CudaKernel})
-target_link_libraries(Mandelbrot_set ${GD_LIBRARIES} ${CUDA_LIBRARIES})
+cuda_add_executable(Mandelbrot_set ${SOURCE_FILES})
+target_link_libraries(Mandelbrot_set CudaKernels ${GD_LIBRARIES} ${CUDA_LIBRARIES})
