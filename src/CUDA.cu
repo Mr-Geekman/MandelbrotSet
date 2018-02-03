@@ -3,7 +3,6 @@
 #include <cuda_runtime_api.h>
 #include <cuda.h>
 #include <cmath>
-#include <iostream>
 #include "../include/CUDA_wrappers.hpp"
 
 #define PRECISION double
@@ -17,6 +16,7 @@ __global__ void compute_point(PRECISION* x_down, PRECISION* x_up, PRECISION* y_d
     PRECISION re_curr = 0.0;
     PRECISION im_curr = 0.0;
     // проверка на принадлежность главной картиоиде
+
     // проверка точки
     if(row >= *height || col >= *width) {
         return;
